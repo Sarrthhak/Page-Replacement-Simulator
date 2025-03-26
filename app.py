@@ -96,69 +96,75 @@ frames = st.number_input(
 # Algorithm selection
 algorithm = st.selectbox("Select Algorithm", ["FIFO", "LRU", "Optimal"])
 
-# Add Run and Clear buttons side by side
-col1, col2 = st.columns(2)
+# Add Run and Clear buttons side by side with tighter spacing
+col1, col2, _ = st.columns([1, 1, 3])
 
 # Run Simulation button
 with col1:
-    if st.button("Run Simulation"):
-        if pages_input:
-            pages = list(map(int, pages_input.split(",")))
-            page_faults, memory_states = run_algorithm(algorithm, pages, frames)
-
-            st.write(f"**Number of Page Faults:** {page_faults}")
-            st.write("**Memory State Changes:**")
-
-            # Split the states into columns to display them side by side
-            columns = st.columns(4)  # 4 columns for better layout
-            for i, state in enumerate(memory_states):
-                with columns[i % 4]:  # Distribute memory states into columns
-                    st.write(f"Step {i+1}: {state}")
-
-            # Bar graph to compare page faults
-            fig, ax = plt.subplots(figsize=(8, 6))  # Increased figure size
-            algorithms = ["FIFO", "LRU", "Optimal"]
-            faults = [
-                fifo(pages, frames)[0],
-                lru(pages, frames)[0],
-                optimal(pages, frames)[0],
-            ]
-            colors = ["#4C72B0", "#55A868", "#C44E52"]  # Professional color palette
-            ax.bar(algorithms, faults, color=colors, width=0.6, edgecolor="black")
-
-            ax.set_ylabel("Page Faults", fontsize=12, fontweight="bold")
-            ax.set_xlabel("Algorithm", fontsize=12, fontweight="bold")
-            ax.set_title("Comparison of Page Faults Across Algorithms", fontsize=14, fontweight="bold")
-            ax.grid(axis="y", linestyle="--", alpha=0.7)
-            ax.spines["top"].set_visible(False)
-            ax.spines["right"].set_visible(False)
-
-            st.pyplot(fig)
-
-            # Find algorithms with minimum and maximum page faults
-            min_faults = min(faults)
-            max_faults = max(faults)
-            
-            best_algorithms = [algorithms[i] for i, fault in enumerate(faults) if fault == min_faults]
-            worst_algorithms = [algorithms[i] for i, fault in enumerate(faults) if fault == max_faults]
-            
-            # Format the insights properly
-            best_algorithm_str = ", ".join(best_algorithms)
-            worst_algorithm_str = ", ".join(worst_algorithms)
-            
-            # Display insights after the graph
-            st.write("## Insights")
-            st.write(f"- **Best Performing Algorithm(s):** {best_algorithm_str} with only {min_faults} page faults.")
-            st.write(f"- **Least Efficient Algorithm(s):** {worst_algorithm_str} with {max_faults} page faults.")
-            st.write("- FIFO performs better when the order of page references is predictable.")
-            st.write("- LRU works well when recent pages are more likely to be accessed again soon.")
-            st.write("- Optimal gives the best performance but requires future knowledge of page references.")
-        else:
-            st.warning("Please enter a valid page reference string!")
+    run_clicked = st.button("Run Simulation")
 
 # Clear button to reset inputs
 with col2:
-    if st.button("Clear"):
-        st.session_state.pages_input = ""
-        st.session_state.frames = 3
-        st.rerun()
+    clear_clicked = st.button("Clear")
+
+# Handle Run Simulation button click
+if run_clicked:
+    if pages_input:
+        pages = list(map(int, pages_input.split(",")))
+        page_faults, memory_states = run_algorithm(algorithm, pages, frames)
+
+        st.write(f"**Number of Page Faults:** {page_faults}")
+        st.write("**Memory State Changes:**")
+
+        # Split the states into columns to display them side by side
+        columns = st.columns(4)  # 4 columns for better layout
+        for i, state in enumerate(memory_states):
+            with columns[i % 4]:  # Distribute memory states into columns
+                st.write(f"Step {i+1}: {state}")
+
+        # Bar graph to compare page faults
+        fig, ax = plt.subplots(figsize=(8, 6))  # Increased figure size
+        algorithms = ["FIFO", "LRU", "Optimal"]
+        faults = [
+            fifo(pages, frames)[0],
+            lru(pages, frames)[0],
+            optimal(pages, frames)[0],
+        ]
+        colors = ["#4C72B0", "#55A868", "#C44E52"]  # Professional color palette
+        ax.bar(algorithms, faults, color=colors, width=0.6, edgecolor="black")
+
+        ax.set_ylabel("Page Faults", fontsize=12, fontweight="bold")
+        ax.set_xlabel("Algorithm", fontsize=12, fontweight="bold")
+        ax.set_title("Comparison of Page Faults Across Algorithms", fontsize=14, fontweight="bold")
+        ax.grid(axis="y", linestyle="--", alpha=0.7)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+        st.pyplot(fig)
+
+        # Find algorithms with minimum and maximum page faults
+        min_faults = min(faults)
+        max_faults = max(faults)
+        
+        best_algorithms = [algorithms[i] for i, fault in enumerate(faults) if fault == min_faults]
+        worst_algorithms = [algorithms[i] for i, fault in enumerate(faults) if fault == max_faults]
+        
+        # Format the insights properly
+        best_algorithm_str = ", ".join(best_algorithms)
+        worst_algorithm_str = ", ".join(worst_algorithms)
+        
+        # Display insights after the graph
+        st.write("## Insights")
+        st.write(f"- **Best Performing Algorithm(s):** {best_algorithm_str} with only {min_faults} page faults.")
+        st.write(f"- **Least Efficient Algorithm(s):** {worst_algorithm_str} with {max_faults} page faults.")
+        st.write("- FIFO performs better when the order of page references is predictable.")
+        st.write("- LRU works well when recent pages are more likely to be accessed again soon.")
+        st.write("- Optimal gives the best performance but requires future knowledge of page references.")
+    else:
+        st.warning("Please enter a valid page reference string!")
+
+# Handle Clear button click
+if clear_clicked:
+    st.session_state.pages_input = ""
+    st.session_state.frames = 3
+    st.rerun()
