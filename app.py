@@ -73,7 +73,9 @@ def run_algorithm(algorithm, pages, frames):
 
 # Streamlit interface
 st.title("Page Replacement Algorithm Simulator")
-st.write("Simulate and compare FIFO, LRU, and Optimal page replacement algorithms.")
+st.write("This application simulates and compares the performance of different page replacement algorithms: "
+    "FIFO, LRU, and Optimal. Enter the page reference string and number of frames, select an algorithm, "
+    "and visualize the results.")
 
 # Input for page reference string and number of frames
 pages_input = st.text_input("Enter page reference string (comma-separated):")
