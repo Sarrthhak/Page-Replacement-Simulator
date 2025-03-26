@@ -118,6 +118,15 @@ if st.button("Run Simulation"):
         ax.spines["right"].set_visible(False)
 
         st.pyplot(fig)
+        best_algorithm = algorithms[faults.index(min(faults))]
+        worst_algorithm = algorithms[faults.index(max(faults))]
+        
+        st.write("## Insights")
+        st.write(f"- **Best Performing Algorithm:** {best_algorithm} with only {min(faults)} page faults.")
+        st.write(f"- **Least Efficient Algorithm:** {worst_algorithm} with {max(faults)} page faults.")
+        st.write("- FIFO performs better when the order of page references is predictable.")
+        st.write("- LRU works well when recent pages are more likely to be accessed again soon.")
+        st.write("- Optimal gives the best performance but requires future knowledge of page references.")
 
 
     else:
