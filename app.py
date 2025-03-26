@@ -93,7 +93,6 @@ if st.button("Run Simulation"):
         for state in memory_states:
             st.write(state)
 
-        # Bar graph to compare page faults
                 # Bar graph to compare page faults
         fig, ax = plt.subplots(figsize=(8, 6))  # Increased figure size
         algorithms = ["FIFO", "LRU", "Optimal"]
@@ -103,20 +102,7 @@ if st.button("Run Simulation"):
             optimal(pages, frames)[0],
         ]
         colors = ["#4C72B0", "#55A868", "#C44E52"]  # Professional color palette
-        bars = ax.bar(algorithms, faults, color=colors, width=0.6, edgecolor="black")
-
-        # Add labels above bars
-        for bar in bars:
-            yval = bar.get_height()
-            ax.text(
-                bar.get_x() + bar.get_width() / 2,
-                yval + 0.5,
-                f"{int(yval)}",
-                ha="center",
-                va="bottom",
-                fontsize=12,
-                fontweight="bold",
-            )
+        ax.bar(algorithms, faults, color=colors, width=0.6, edgecolor="black")
 
         ax.set_ylabel("Page Faults", fontsize=12, fontweight="bold")
         ax.set_xlabel("Algorithm", fontsize=12, fontweight="bold")
@@ -126,6 +112,7 @@ if st.button("Run Simulation"):
         ax.spines["right"].set_visible(False)
 
         st.pyplot(fig)
+
 
     else:
         st.warning("Please enter a valid page reference string!")
