@@ -90,8 +90,12 @@ if st.button("Run Simulation"):
 
         st.write(f"**Number of Page Faults:** {page_faults}")
         st.write("**Memory State Changes:**")
-        for state in memory_states:
-            st.write(state)
+
+# Split the states into columns to display them side by side
+columns = st.columns(4)  # 4 columns for better layout
+for i, state in enumerate(memory_states):
+    with columns[i % 4]:  # Distribute memory states into columns
+        st.write(f"Step {i+1}: {state}")
 
                 # Bar graph to compare page faults
         fig, ax = plt.subplots(figsize=(8, 6))  # Increased figure size
