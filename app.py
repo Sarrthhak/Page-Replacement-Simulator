@@ -1,109 +1,149 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 
-# FIFO Algorithm
+# Page Replacement Algorithms
 def fifo(pages, frames):
-    memory, page_faults = [], 0
-    memory_states = []
-    
+    page_set = set()
+    page_queue = []
+    page_faults = 0
+    steps = []
+
     for page in pages:
-        if page not in memory:
-            if len(memory) < frames:
-                memory.append(page)
+        if page not in page_set:
+            if len(page_set) < frames:
+                page_set.add(page)
+                page_queue.append(page)
             else:
-                memory.pop(0)
-                memory.append(page)
+                removed_page = page_queue.pop(0)
+                page_set.remove(removed_page)
+                page_set.add(page)
+                page_queue.append(page)
             page_faults += 1
-        memory_states.append(memory[:])
-    
-    return page_faults, memory_states
+        steps.append(list(page_queue))
 
-# LRU Algorithm
+    return page_faults, steps
+
+
 def lru(pages, frames):
-    memory, page_faults = [], 0
-    memory_states = []
-    page_indices = {}
-    
-    for i, page in enumerate(pages):
-        if page not in memory:
-            if len(memory) < frames:
-                memory.append(page)
-            else:
-                lru_page = min(memory, key=lambda p: page_indices[p])
-                memory.remove(lru_page)
-                memory.append(page)
-            page_faults += 1
-        page_indices[page] = i
-        memory_states.append(memory[:])
-    
-    return page_faults, memory_states
+    page_set = set()
+    page_map = {}
+    page_faults = 0
+    steps = []
 
-# Optimal Algorithm
+    for i, page in enumerate(pages):
+        if page not in page_set:
+            if len(page_set) < frames:
+                page_set.add(page)
+            else:
+                lru_page = min(page_map, key=page_map.get)
+                page_set.remove(lru_page)
+                del page_map[lru_page]
+                page_set.add(page)
+            page_faults += 1
+        page_map[page] = i
+        steps.append(sorted(page_set, key=lambda x: page_map[x]))
+
+    return page_faults, steps
+
+
 def optimal(pages, frames):
-    memory, page_faults = [], 0
-    memory_states = []
-    
+    page_set = set()
+    page_queue = []
+    page_faults = 0
+    steps = []
+
     for i, page in enumerate(pages):
-        if page not in memory:
-            if len(memory) < frames:
-                memory.append(page)
+        if page not in page_set:
+            if len(page_set) < frames:
+                page_set.add(page)
+                page_queue.append(page)
             else:
-                future_indices = []
-                for mem_page in memory:
-                    if mem_page in pages[i:]:
-                        future_indices.append(pages[i:].index(mem_page))
+                future_pages = pages[i + 1 :]
+                replace_page = -1
+                farthest_index = -1
+                for p in page_set:
+                    if p not in future_pages:
+                        replace_page = p
+                        break
                     else:
-                        future_indices.append(float('inf'))
-                
-                replace_index = future_indices.index(max(future_indices))
-                memory[replace_index] = page
+                        index = future_pages.index(p)
+                        if index > farthest_index:
+                            farthest_index = index
+                            replace_page = p
+                page_set.remove(replace_page)
+                page_queue.remove(replace_page)
+                page_set.add(page)
+                page_queue.append(page)
             page_faults += 1
-        memory_states.append(memory[:])
-    
-    return page_faults, memory_states
+        steps.append(list(page_queue))
 
-# Run the selected algorithm
-def run_algorithm(algorithm, pages, frames):
-    if algorithm == "FIFO":
-        return fifo(pages, frames)
-    elif algorithm == "LRU":
-        return lru(pages, frames)
-    elif algorithm == "Optimal":
-        return optimal(pages, frames)
+    return page_faults, steps
 
-# Streamlit interface
+
+# Streamlit UI
 st.title("Page Replacement Algorithm Simulator")
-st.write("Simulate and compare FIFO, LRU, and Optimal page replacement algorithms.")
 
-# Input for page reference string and number of frames
-pages_input = st.text_input("Enter page reference string (comma-separated):")
-frames = st.number_input("Enter number of frames:", min_value=1, max_value=10, value=3)
+# Input fields
+pages_input = st.text_input(
+    "Enter Page Reference String (e.g., 1,2,3,4,1,2):", "7,0,1,2,0,3,0,4,2,3"
+)
+frames_input = st.number_input(
+    "Enter Number of Frames:", min_value=1, max_value=10, value=3, step=1
+)
 
-# Algorithm selection
-algorithm = st.selectbox("Select Algorithm", ["FIFO", "LRU", "Optimal"])
+algorithm = st.selectbox(
+    "Select Algorithm", ("FIFO", "LRU", "Optimal"), index=0
+)
 
-# Run the simulation when the button is pressed
-if st.button("Run Simulation"):
-    if pages_input:
+if st.button("Simulate"):
+    try:
         pages = list(map(int, pages_input.split(",")))
-        page_faults, memory_states = run_algorithm(algorithm, pages, frames)
+        frames = int(frames_input)
 
-        st.write(f"**Number of Page Faults:** {page_faults}")
-        st.write("**Memory State Changes:**")
-        for state in memory_states:
-            st.write(state)
+        if algorithm == "FIFO":
+            faults, steps = fifo(pages, frames)
+        elif algorithm == "LRU":
+            faults, steps = lru(pages, frames)
+        elif algorithm == "Optimal":
+            faults, steps = optimal(pages, frames)
 
-        # Bar graph to compare page faults
-        fig, ax = plt.subplots()
+        st.success(f"Page Faults using {algorithm}: {faults}")
+
+        # Display Memory Steps
+        st.write("Memory State at each step:")
+        for i, step in enumerate(steps):
+            st.write(f"Step {i + 1}: {step}")
+
+        # Plot Comparison Graph
+        fifo_faults, _ = fifo(pages, frames)
+        lru_faults, _ = lru(pages, frames)
+        opt_faults, _ = optimal(pages, frames)
+
         algorithms = ["FIFO", "LRU", "Optimal"]
-        faults = [
-            fifo(pages, frames)[0],
-            lru(pages, frames)[0],
-            optimal(pages, frames)[0],
-        ]
-        ax.bar(algorithms, faults, color=["blue", "green", "red"])
-        ax.set_ylabel("Page Faults")
-        ax.set_title("Comparison of Page Faults Across Algorithms")
+        faults_data = [fifo_faults, lru_faults, opt_faults]
+
+        fig, ax = plt.subplots(figsize=(8, 6))
+        bars = ax.bar(
+            algorithms, faults_data, color=["#4C72B0", "#55A868", "#C44E52"], width=0.5
+        )
+        
+        ax.set_title("Page Faults Comparison", fontsize=14, weight="bold")
+        ax.set_xlabel("Algorithm", fontsize=12)
+        ax.set_ylabel("Number of Page Faults", fontsize=12)
+        ax.grid(axis="y", linestyle="--", alpha=0.7)
+        
+        # Add fault count on top of bars
+        for bar, value in zip(bars, faults_data):
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height() + 0.5,
+                str(value),
+                ha="center",
+                va="bottom",
+                fontsize=11,
+            )
+
         st.pyplot(fig)
-    else:
-        st.warning("Please enter a valid page reference string!")
+
+    except ValueError:
+        st.error("Invalid input! Please enter a valid page reference string (numbers only).")
