@@ -52,26 +52,33 @@ def optimal(pages, frames):
     return page_faults
 
 # Plot Results with Professional-Looking Graphs
-def plot_results(faults, algorithm_name):
-    plt.figure(figsize=(5, 5))
-    bar_color = "#4C72B0"
-    bar = plt.bar(algorithm_name, faults, color=bar_color)
-    
-    # Add label on top of the bar
-    for rect in bar:
+def plot_results(fifo_faults, lru_faults, optimal_faults, selected_algorithm):
+    algorithms = ["FIFO", "LRU", "Optimal"]
+    faults = [fifo_faults, lru_faults, optimal_faults]
+    colors = ["#4C72B0", "#55A868", "#C44E52"]
+
+    plt.figure(figsize=(8, 6))
+    bars = plt.bar(algorithms, faults, color=colors)
+
+    # Highlight the selected algorithm
+    selected_index = algorithms.index(selected_algorithm)
+    bars[selected_index].set_color("#F28E2B")
+
+    # Add page fault count above each bar
+    for rect in bars:
         yval = rect.get_height()
         plt.text(
-            rect.get_x() + rect.get_width()/2,
+            rect.get_x() + rect.get_width() / 2,
             yval + 0.5,
             f"{int(yval)}",
             ha="center",
             va="bottom",
             fontsize=12,
-            fontweight="bold"
+            fontweight="bold",
         )
-    
-    plt.ylim(0, faults + 2)
-    plt.title(f"{algorithm_name} Algorithm - Page Faults", fontsize=14, fontweight="bold")
+
+    plt.ylim(0, max(faults) + 3)
+    plt.title(f"Page Fault Comparison of Algorithms", fontsize=14, fontweight="bold")
     plt.xlabel("Algorithm", fontsize=12, fontweight="bold")
     plt.ylabel("Number of Page Faults", fontsize=12, fontweight="bold")
     plt.grid(axis="y", linestyle="--", alpha=0.7)
@@ -86,12 +93,12 @@ st.write(
 )
 
 # User Inputs
-pages_input = st.text_input("Enter Page Reference String (comma-separated)", "7, 0, 1, 2, 0, 3, 4, 2, 3, 0, 3, 2")
+pages_input = st.text_input("Enter Page Reference String (comma-separated)", "7,0,1,2,0,3,4,2,3,0,3,2")
 frames_input = st.number_input("Enter Number of Frames", min_value=1, max_value=10, value=3)
 
 # Algorithm Selection
 algorithm_choice = st.selectbox(
-    "Select an Algorithm",
+    "Select an Algorithm to Highlight",
     ("FIFO", "LRU", "Optimal"),
     index=0
 )
@@ -99,22 +106,22 @@ algorithm_choice = st.selectbox(
 # Process Input
 if st.button("Run Simulation"):
     try:
+        # Parse input
         pages = list(map(int, pages_input.split(",")))
         frames = int(frames_input)
         
-        # Run selected algorithm
-        if algorithm_choice == "FIFO":
-            page_faults = fifo(pages, frames)
-        elif algorithm_choice == "LRU":
-            page_faults = lru(pages, frames)
-        elif algorithm_choice == "Optimal":
-            page_faults = optimal(pages, frames)
+        # Run all algorithms
+        fifo_faults = fifo(pages, frames)
+        lru_faults = lru(pages, frames)
+        optimal_faults = optimal(pages, frames)
 
         # Display results
-        st.write(f"**{algorithm_choice} Algorithm:** {page_faults} page faults")
-        
-        # Plot the results
-        plot_results(page_faults, algorithm_choice)
+        st.write(f"**FIFO Algorithm:** {fifo_faults} page faults")
+        st.write(f"**LRU Algorithm:** {lru_faults} page faults")
+        st.write(f"**Optimal Algorithm:** {optimal_faults} page faults")
+
+        # Plot all results and highlight selected algorithm
+        plot_results(fifo_faults, lru_faults, optimal_faults, algorithm_choice)
 
     except ValueError:
         st.error("Please enter a valid comma-separated sequence of integers for the page reference string.")
