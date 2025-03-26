@@ -93,7 +93,7 @@ st.write(
 )
 
 # User Inputs
-pages_input = st.text_input("Enter Page Reference String (comma-separated)", "7,0,1,2,0,3,4,2,3,0,3,2")
+pages_input = st.text_input("Enter Page Reference String (comma-separated)", "7, 0, 1, 2, 0, 3, 4, 2, 3, 0, 3, 2")
 frames_input = st.number_input("Enter Number of Frames", min_value=1, max_value=10, value=3)
 
 # Algorithm Selection
@@ -106,14 +106,17 @@ algorithm_choice = st.selectbox(
 # Process Input
 if st.button("Run Simulation"):
     try:
-        # Parse input
-        pages = list(map(int, pages_input.split(",")))
-        frames = int(frames_input)
-        
+        # Clean and parse the page input correctly
+        pages = [int(x.strip()) for x in pages_input.split(",") if x.strip().isdigit()]
+
+        # Check for valid input
+        if not pages:
+            raise ValueError("Empty or invalid page reference string.")
+
         # Run all algorithms
-        fifo_faults = fifo(pages, frames)
-        lru_faults = lru(pages, frames)
-        optimal_faults = optimal(pages, frames)
+        fifo_faults = fifo(pages, frames_input)
+        lru_faults = lru(pages, frames_input)
+        optimal_faults = optimal(pages, frames_input)
 
         # Display results
         st.write(f"**FIFO Algorithm:** {fifo_faults} page faults")
@@ -124,4 +127,4 @@ if st.button("Run Simulation"):
         plot_results(fifo_faults, lru_faults, optimal_faults, algorithm_choice)
 
     except ValueError:
-        st.error("Please enter a valid comma-separated sequence of integers for the page reference string.")
+        st.error("❗ Please enter a valid comma-separated sequence of integers for the page reference string.")
