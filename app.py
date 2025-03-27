@@ -71,64 +71,6 @@ def run_algorithm(algorithm, pages, frames):
     elif algorithm == "Optimal":
         return optimal(pages, frames)
 
-# Custom CSS for professional look
-st.markdown(
-    """
-    <style>
-    body {
-        background-color: #F5F5F5;
-        font-family: 'Arial', sans-serif;
-    }
-    .stApp {
-        background-color: #FFFFFF;
-        border: 1px solid #E0E0E0;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .css-18e3th9 {
-        padding-top: 1rem;
-    }
-    .stTextInput, .stNumberInput, .stSelectbox {
-        border: 1px solid #D1D1D1;
-        border-radius: 5px;
-        padding: 10px;
-        background-color: #FAFAFA;
-    }
-    .stButton>button {
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        font-size: 14px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    .stButton>button:hover {
-        background-color: #45A049;
-    }
-    .stMarkdown {
-        font-size: 16px;
-        line-height: 1.6;
-    }
-    .stAlert {
-        background-color: #FFF3CD;
-        color: #856404;
-        padding: 12px;
-        border-radius: 5px;
-    }
-    .stWarning {
-        background-color: #F8D7DA;
-        color: #721C24;
-        padding: 12px;
-        border-radius: 5px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # Interface of Streamlit
 st.title("Page Replacement Algorithm Simulator")
 st.write(
