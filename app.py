@@ -62,7 +62,7 @@ def optimal(pages, frames):
     
     return page_faults, memory_states
 
-# Run the selected algorithm
+# Function to run the selected algorithm. It takes type of algorithm, pages sequence and no. of frames as arguments
 def run_algorithm(algorithm, pages, frames):
     if algorithm == "FIFO":
         return fifo(pages, frames)
@@ -71,7 +71,65 @@ def run_algorithm(algorithm, pages, frames):
     elif algorithm == "Optimal":
         return optimal(pages, frames)
 
-# Streamlit interface
+# Custom CSS for professional look
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: #F5F5F5;
+        font-family: 'Arial', sans-serif;
+    }
+    .stApp {
+        background-color: #FFFFFF;
+        border: 1px solid #E0E0E0;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .css-18e3th9 {
+        padding-top: 1rem;
+    }
+    .stTextInput, .stNumberInput, .stSelectbox {
+        border: 1px solid #D1D1D1;
+        border-radius: 5px;
+        padding: 10px;
+        background-color: #FAFAFA;
+    }
+    .stButton>button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .stButton>button:hover {
+        background-color: #45A049;
+    }
+    .stMarkdown {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+    .stAlert {
+        background-color: #FFF3CD;
+        color: #856404;
+        padding: 12px;
+        border-radius: 5px;
+    }
+    .stWarning {
+        background-color: #F8D7DA;
+        color: #721C24;
+        padding: 12px;
+        border-radius: 5px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Interface of Streamlit
 st.title("Page Replacement Algorithm Simulator")
 st.write(
     "This application simulates and compares the performance of different page replacement algorithms: "
@@ -99,15 +157,15 @@ algorithm = st.selectbox("Select Algorithm", ["FIFO", "LRU", "Optimal"])
 # Add Run and Clear buttons side by side with tighter spacing
 col1, col2, _ = st.columns([1, 1, 3])
 
-# Run Simulation button
+# Adding run simulation button
 with col1:
     run_clicked = st.button("Run Simulation")
 
-# Clear button to reset inputs
+# Adding clear button
 with col2:
     clear_clicked = st.button("Clear")
 
-# Handle Run Simulation button click
+# Handling the run simulation button
 if run_clicked:
     if pages_input:
         pages = list(map(int, pages_input.split(",")))
@@ -163,7 +221,7 @@ if run_clicked:
     else:
         st.warning("Please enter a valid page reference string!")
 
-# Handle Clear button click
+# Handling the clear button
 if clear_clicked:
     st.session_state.pages_input = ""
     st.session_state.frames = 3
