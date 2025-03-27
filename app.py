@@ -122,22 +122,6 @@ if run_clicked:
             with columns[i % 4]:  # Distribute memory states into columns
                 st.write(f"Step {i+1}: {state}")
 
-        # Scroll to the results after running the simulation
-        st.markdown(
-            """
-            <script>
-                var element = document.getElementById('results');
-                if (element) {
-                    element.scrollIntoView({behavior: 'smooth', block: 'start'});
-                }
-            </script>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        # Place an invisible anchor where results are displayed
-        st.markdown('<div id="results"></div>', unsafe_allow_html=True)
-
         # Bar graph to compare page faults
         fig, ax = plt.subplots(figsize=(8, 6))  # Increased figure size
         algorithms = ["FIFO", "LRU", "Optimal"]
