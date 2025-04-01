@@ -207,6 +207,8 @@ if generate_btn and ref_string:
     
     st.write(f"**Reference String:** {' '.join(map(str, pages))}")
 
+# In your Streamlit code, replace the Results section with this:
+
 # Results Section
 if generate_btn and ref_string:
     st.markdown("---")
@@ -218,40 +220,48 @@ if generate_btn and ref_string:
     miss_rate = 100 - hit_rate
     
     # Metrics in one line
-    with st.container():
-        st.markdown('<div class="metric-row">', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Page Faults", page_faults)
+    with col2:
+        st.metric("Hits", hit_count)
+    
+    # Hit/Miss Ratio with proper formatting
+    st.markdown("### Hit/Miss Ratio")
+    
+    # Create two columns for the ratio bars
+    col1, col2 = st.columns(2)
+    
+    with col1:
         st.markdown(f"""
-        <div class="metric-item">
-            <div class="result-box">
-                <h4>Page Faults</h4>
-                <h2>{page_faults}</h2>
-            </div>
-        </div>
-        <div class="metric-item">
-            <div class="result-box">
-                <h4>Hits</h4>
-                <h2>{hit_count}</h2>
+        <div style="background-color: #f0f0f0; border-radius: 10px; padding: 10px; margin-bottom: 10px;">
+            <div style="color: #28a745; font-weight: bold;">Hits</div>
+            <div style="display: flex; align-items: center;">
+                <div style="width: {hit_rate}%; background-color: #28a745; height: 24px; 
+                    border-radius: 5px; display: flex; align-items: center; padding-left: 5px; 
+                    color: white; min-width: fit-content;">
+                    {hit_rate:.1f}% ({hit_count})
+                </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
     
-    # Hit/Miss Ratio Bars with proper text visibility
-    st.write("**Hit/Miss Ratio:**")
-    st.markdown(f"""
-    <div class="ratio-container">
-        <div class="ratio-bar">
-            <div class="ratio-fill hit-fill" style="width: {max(20, hit_rate)}%">
-                <span class="ratio-label">{hit_rate:.1f}% Hits ({hit_count})</span>
+    with col2:
+        st.markdown(f"""
+        <div style="background-color: #f0f0f0; border-radius: 10px; padding: 10px; margin-bottom: 10px;">
+            <div style="color: #dc3545; font-weight: bold;">Misses</div>
+            <div style="display: flex; align-items: center;">
+                <div style="width: {miss_rate}%; background-color: #dc3545; height: 24px; 
+                    border-radius: 5px; display: flex; align-items: center; padding-left: 5px; 
+                    color: white; min-width: fit-content;">
+                    {miss_rate:.1f}% ({page_faults})
+                </div>
             </div>
         </div>
-        <div class="ratio-bar">
-            <div class="ratio-fill miss-fill" style="width: {max(20, miss_rate)}%">
-                <span class="ratio-label">{miss_rate:.1f}% Misses ({page_faults})</span>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+
+    # Rest of your results display (memory states, comparison chart, insights)
+    # ... [keep your existing code for memory states, comparison chart, and insights] ...
 
     # Memory States Table
     st.subheader("Memory State Changes")
