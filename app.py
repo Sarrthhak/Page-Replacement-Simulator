@@ -72,7 +72,7 @@ def run_algorithm(algorithm, pages, frames):
         return optimal(pages, frames)
 
 # UI Configuration
-st.set_page_config(layout="wide")
+st.set_page_config(layout="centered")
 
 # Custom CSS for styling
 st.markdown("""
@@ -83,28 +83,57 @@ st.markdown("""
         margin-bottom: 20px !important;
     }
     .result-box {
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 15px;
-        margin-bottom: 20px;
-        background-color: #f9f9f9;
-    }
-    .metric-box {
         border: 1px solid #e0e0e0;
-        border-radius: 5px;
-        padding: 10px;
-        margin: 5px;
-        background-color: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background-color: #f8f9fa;
+    }
+    .metric-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    .metric-item {
+        flex: 1;
+        margin: 0 5px;
+    }
+    .progress-container {
+        height: 30px;
+        background-color: #e9ecef;
+        border-radius: 15px;
+        margin: 10px 0;
+        overflow: hidden;
+    }
+    .progress-bar {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+    .hit-bar {
+        background-color: #28a745;
+    }
+    .miss-bar {
+        background-color: #dc3545;
+    }
+    .insight-box {
+        border-left: 4px solid #6c757d;
+        padding: 12px;
+        margin: 10px 0;
+        background-color: #f8f9fa;
+        border-radius: 0 8px 8px 0;
     }
     .footer {
         font-size: 12px;
         color: #666;
         margin-top: 30px;
+        text-align: center;
     }
-    .highlight {
-        background-color: #f0f2f6;
-        padding: 2px 5px;
-        border-radius: 3px;
+    .dataframe {
+        width: 100%;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -159,24 +188,44 @@ if generate_btn and ref_string:
     hit_rate = (hit_count / len(pages)) * 100
     miss_rate = 100 - hit_rate
     
-    # Results Metrics
+    # Metrics in one line
     with st.container():
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.markdown('<div class="result-box">', unsafe_allow_html=True)
-            st.metric("PAGE FAULTS", page_faults)
-            st.markdown('</div>', unsafe_allow_html=True)
-        
-        with col2:
-            st.markdown('<div class="result-box">', unsafe_allow_html=True)
-            st.metric("HIT RATE", f"{hit_rate:.2f}% [{hit_count}]")
-            st.markdown('</div>', unsafe_allow_html=True)
-        
-        with col3:
-            st.markdown('<div class="result-box">', unsafe_allow_html=True)
-            st.metric("MISS RATE", f"{miss_rate:.2f}% [{page_faults}]")
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-row">', unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="metric-item">
+            <div class="result-box">
+                <h4>Page Faults</h4>
+                <h2>{page_faults}</h2>
+            </div>
+        </div>
+        <div class="metric-item">
+            <div class="result-box">
+                <h4>Hits</h4>
+                <h2>{hit_count}</h2>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Hit/Miss Ratio Bars
+    st.write("**Hit/Miss Ratio:**")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown(f"""
+        <div class="progress-container">
+            <div class="progress-bar hit-bar" style="width: {hit_rate}%">
+                {hit_rate:.1f}% Hits
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown(f"""
+        <div class="progress-container">
+            <div class="progress-bar miss-bar" style="width: {miss_rate}%">
+                {miss_rate:.1f}% Misses
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # Memory States Table
     st.subheader("Memory State Changes")
@@ -192,9 +241,10 @@ if generate_btn and ref_string:
     
     st.dataframe(state_table, use_container_width=True, height=400)
 
-    # Algorithm Comparison Chart
+    # Algorithm Comparison Chart (more compact)
     st.subheader("Algorithm Comparison")
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(8, 4))  # Smaller figure size
+    
     algorithms = ["FIFO", "LRU", "Optimal"]
     faults = [
         fifo(pages, frames)[0],
@@ -203,9 +253,8 @@ if generate_btn and ref_string:
     ]
     
     colors = ["#4C72B0", "#55A868", "#C44E52"]
-    bars = ax.bar(algorithms, faults, color=colors)
+    bars = ax.bar(algorithms, faults, color=colors, width=0.6)
     ax.set_ylabel("Page Faults")
-    ax.set_title("Page Faults Comparison Across Algorithms")
     
     # Add value labels on top of each bar
     for bar in bars:
@@ -214,34 +263,38 @@ if generate_btn and ref_string:
                 f'{int(height)}',
                 ha='center', va='bottom')
     
+    plt.tight_layout()  # Prevent label cutoff
     st.pyplot(fig)
 
-    # Algorithm Insights
+    # Algorithm Insights with better visibility
     st.subheader("Algorithm Insights")
     min_fault = min(faults)
     max_fault = max(faults)
     
     if faults[0] == min_fault:
         st.markdown("""
-        <div class="highlight">
-        <b>FIFO performed best:</b> FIFO works well when the page reference pattern has fewer repeated pages 
-        and the order of page usage is predictable. However, it may cause Belady's anomaly.
+        <div class="insight-box">
+            <h4>FIFO Performed Best</h4>
+            <p>FIFO works well when the page reference pattern has fewer repeated pages 
+            and the order of page usage is predictable. However, it may cause Belady's anomaly.</p>
         </div>
         """, unsafe_allow_html=True)
     
     if faults[1] == min_fault:
         st.markdown("""
-        <div class="highlight">
-        <b>LRU performed best:</b> LRU performs well when the most recently used pages are likely to be used again soon.
-        It's more efficient for workloads where recent usage predicts future usage.
+        <div class="insight-box">
+            <h4>LRU Performed Best</h4>
+            <p>LRU performs well when the most recently used pages are likely to be used again soon.
+            It's more efficient for workloads where recent usage predicts future usage.</p>
         </div>
         """, unsafe_allow_html=True)
     
     if faults[2] == min_fault:
         st.markdown("""
-        <div class="highlight">
-        <b>Optimal performed best:</b> Optimal provides the theoretical minimum number of page faults 
-        by replacing the page that won't be used for the longest period. This is unrealistic in practice.
+        <div class="insight-box">
+            <h4>Optimal Performed Best</h4>
+            <p>Optimal provides the theoretical minimum number of page faults 
+            by replacing the page that won't be used for the longest period. This is unrealistic in practice.</p>
         </div>
         """, unsafe_allow_html=True)
 
