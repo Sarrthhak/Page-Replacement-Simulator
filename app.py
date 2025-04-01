@@ -71,6 +71,12 @@ def run_algorithm(algorithm, pages, frames):
     elif algorithm == "Optimal":
         return optimal(pages, frames)
 
+import streamlit as st
+import matplotlib.pyplot as plt
+import numpy as np
+
+# [Keep all your original algorithm functions here - FIFO, LRU, Optimal, run_algorithm]
+
 # UI Configuration
 st.set_page_config(layout="centered")
 
@@ -93,38 +99,61 @@ st.markdown("""
         display: flex;
         justify-content: space-between;
         margin-bottom: 10px;
+        gap: 10px;
     }
     .metric-item {
         flex: 1;
-        margin: 0 5px;
     }
-    .progress-container {
+    .ratio-container {
+        display: flex;
+        margin: 15px 0;
+        gap: 10px;
+    }
+    .ratio-bar {
+        flex: 1;
         height: 30px;
         background-color: #e9ecef;
         border-radius: 15px;
-        margin: 10px 0;
         overflow: hidden;
+        position: relative;
     }
-    .progress-bar {
+    .ratio-fill {
         height: 100%;
         display: flex;
         align-items: center;
-        justify-content: center;
+        min-width: fit-content;
+    }
+    .hit-fill {
+        background-color: #28a745;
+        justify-content: flex-end;
+        padding-right: 8px;
+    }
+    .miss-fill {
+        background-color: #dc3545;
+        padding-left: 8px;
+    }
+    .ratio-label {
+        position: absolute;
+        width: 100%;
+        text-align: center;
         color: white;
         font-weight: bold;
-    }
-    .hit-bar {
-        background-color: #28a745;
-    }
-    .miss-bar {
-        background-color: #dc3545;
+        z-index: 2;
     }
     .insight-box {
         border-left: 4px solid #6c757d;
-        padding: 12px;
-        margin: 10px 0;
+        padding: 12px 15px;
+        margin: 15px 0;
         background-color: #f8f9fa;
         border-radius: 0 8px 8px 0;
+    }
+    .insight-box h4 {
+        margin-top: 0;
+        color: #343a40;
+    }
+    .insight-box p {
+        margin-bottom: 0;
+        color: #495057;
     }
     .footer {
         font-size: 12px;
@@ -207,25 +236,22 @@ if generate_btn and ref_string:
         """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
     
-    # Hit/Miss Ratio Bars
+    # Hit/Miss Ratio Bars with proper text visibility
     st.write("**Hit/Miss Ratio:**")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown(f"""
-        <div class="progress-container">
-            <div class="progress-bar hit-bar" style="width: {hit_rate}%">
-                {hit_rate:.1f}% Hits
+    st.markdown(f"""
+    <div class="ratio-container">
+        <div class="ratio-bar">
+            <div class="ratio-fill hit-fill" style="width: {max(20, hit_rate)}%">
+                <span class="ratio-label">{hit_rate:.1f}% Hits ({hit_count})</span>
             </div>
         </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown(f"""
-        <div class="progress-container">
-            <div class="progress-bar miss-bar" style="width: {miss_rate}%">
-                {miss_rate:.1f}% Misses
+        <div class="ratio-bar">
+            <div class="ratio-fill miss-fill" style="width: {max(20, miss_rate)}%">
+                <span class="ratio-label">{miss_rate:.1f}% Misses ({page_faults})</span>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
     # Memory States Table
     st.subheader("Memory State Changes")
@@ -243,7 +269,7 @@ if generate_btn and ref_string:
 
     # Algorithm Comparison Chart (more compact)
     st.subheader("Algorithm Comparison")
-    fig, ax = plt.subplots(figsize=(8, 4))  # Smaller figure size
+    fig, ax = plt.subplots(figsize=(8, 4))
     
     algorithms = ["FIFO", "LRU", "Optimal"]
     faults = [
@@ -263,10 +289,10 @@ if generate_btn and ref_string:
                 f'{int(height)}',
                 ha='center', va='bottom')
     
-    plt.tight_layout()  # Prevent label cutoff
+    plt.tight_layout()
     st.pyplot(fig)
 
-    # Algorithm Insights with better visibility
+    # Algorithm Insights with proper visibility
     st.subheader("Algorithm Insights")
     min_fault = min(faults)
     max_fault = max(faults)
