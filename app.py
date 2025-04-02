@@ -161,4 +161,4 @@ if st.button("Generate"):
         """)
 
 st.markdown("---")
-st.caption("Page Replacement Algorithm Simulator © 2023")
+st.caption("Made by Sarthak Pipladiya, Abhishek Kumar, Himanshu Gobari")
