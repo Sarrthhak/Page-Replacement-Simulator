@@ -95,8 +95,25 @@ if st.button("Generate"):
     with col2:
         st.metric("Hits", hit_count)
     
-    st.write("**Hit/Miss Ratio:**")
-    st.write(f"{miss_rate:.1f}% Misses ({page_faults})")
+    # Battery-style Hit/Miss Ratio Visualization
+    st.markdown("---")
+    st.header("Hit/Miss Ratio Visualization")
+    
+    fig, ax = plt.subplots(figsize=(6, 1.2))
+    ax.barh(["Hit Ratio", "Miss Ratio"], [hit_count, page_faults], color=["#4CAF50", "#F44336"], height=0.5)
+    ax.set_xlim(0, len(pages))
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    
+    # Display text inside bars
+    ax.text(hit_count / 2, 0, f"Hits: {hit_count} ({100 - miss_rate:.1f}%)", color="white", ha="center", va="center", fontsize=12)
+    ax.text(page_faults / 2, 1, f"Misses: {page_faults} ({miss_rate:.1f}%)", color="white", ha="center", va="center", fontsize=12)
+    
+    st.pyplot(fig)
     
     # Memory States Table
     st.markdown("---")
