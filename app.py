@@ -1,5 +1,6 @@
 import streamlit as st
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Algorithm Implementations
 def fifo(pages, frames):
@@ -88,6 +89,7 @@ if st.button("Generate"):
     
     hit_count = len(pages) - page_faults
     miss_rate = (page_faults / len(pages)) * 100
+    hit_rate = (hit_count / len(pages)) * 100
     
     col1, col2 = st.columns(2)
     with col1:
@@ -95,25 +97,22 @@ if st.button("Generate"):
     with col2:
         st.metric("Hits", hit_count)
     
-    # Battery-style Hit/Miss Ratio Visualization
-    st.markdown("---")
-    st.header("Hit/Miss Ratio Visualization")
+    st.write("**Hit/Miss Ratio:**")
+    st.write(f"{miss_rate:.1f}% Misses ({page_faults})")
     
-    fig, ax = plt.subplots(figsize=(6, 1.2))
-    ax.barh(["Hit Ratio", "Miss Ratio"], [hit_count, page_faults], color=["#4CAF50", "#F44336"], height=0.5)
-    ax.set_xlim(0, len(pages))
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
+    # Battery-like Visualization
+    def battery_bar(percentage, label, color):
+        fig, ax = plt.subplots(figsize=(4, 0.5))
+        ax.barh(0, percentage, color=color, height=0.4)
+        ax.set_xlim(0, 100)
+        ax.set_yticks([])
+        ax.set_xticks([0, 25, 50, 75, 100])
+        ax.set_xticklabels(["0%", "25%", "50%", "75%", "100%"])
+        ax.set_title(label)
+        st.pyplot(fig)
     
-    # Display text inside bars
-    ax.text(hit_count / 2, 0, f"Hits: {hit_count} ({100 - miss_rate:.1f}%)", color="white", ha="center", va="center", fontsize=12)
-    ax.text(page_faults / 2, 1, f"Misses: {page_faults} ({miss_rate:.1f}%)", color="white", ha="center", va="center", fontsize=12)
-    
-    st.pyplot(fig)
+    battery_bar(hit_rate, "Hit Rate", "green")
+    battery_bar(miss_rate, "Miss Rate", "red")
     
     # Memory States Table
     st.markdown("---")
@@ -139,6 +138,7 @@ if st.button("Generate"):
     faults = [fifo(pages, frames)[0], lru(pages, frames)[0], optimal(pages, frames)[0]]
     ax.bar(algorithms, faults, color=["#4C72B0", "#55A868", "#C44E52"])
     ax.set_ylabel("Page Faults")
+    ax.grid(True, linestyle='--', alpha=0.6)
     st.pyplot(fig)
     
     # Insights
@@ -161,4 +161,4 @@ if st.button("Generate"):
         """)
 
 st.markdown("---")
-st.caption("Made by Sarthak Pipladiya, Abhishek Kumar, Himanshu Gobari")
+st.caption("Page Replacement Algorithm Simulator © 2023")
