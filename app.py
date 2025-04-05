@@ -1,32 +1,22 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 # Algorithm Implementations
 def fifo(pages, frames):
     memory, page_faults = [], 0
     memory_states = []
-    decisions = []
-    
     for page in pages:
-        message = ""
         if page not in memory:
             if len(memory) < frames:
                 memory.append(page)
-                message = f"➕ Page {page} added."
             else:
-                removed = memory.pop(0)
+                memory.pop(0)
                 memory.append(page)
-                message = f"🔁 Page {removed} replaced with {page} (FIFO)."
             page_faults += 1
-        else:
-            message = f"✅ Page {page} hit. No replacement."
-        
         memory_states.append(memory.copy())
-        decisions.append(message)
-    
-    return page_faults, memory_states, decisions
-
+    return page_faults, memory_states
 
 def lru(pages, frames):
     memory, page_faults = [], 0
@@ -67,8 +57,6 @@ def optimal(pages, frames):
 
 # UI Configuration
 st.set_page_config(layout="centered")
-
-# Input Section
 st.title("Page Replacement Algorithm Simulator")
 
 algorithm = st.selectbox("Select algorithm", ["FIFO", "LRU", "Optimal"])
@@ -108,38 +96,36 @@ if st.button("Generate"):
     with col2:
         st.metric("Hits", hit_count)
     
-    st.write("**Hit/Miss Ratio:**")
-    st.write(f"{miss_rate:.1f}% Misses ({page_faults})")
-    
-    # Battery-like Visualization
-    def battery_bar(percentage, label, color):
-        fig, ax = plt.subplots(figsize=(4, 0.5))
-        ax.barh(0, percentage, color=color, height=0.4)
-        ax.set_xlim(0, 100)
-        ax.set_yticks([])
-        ax.set_xticks([0, 25, 50, 75, 100])
-        ax.set_xticklabels(["0%", "25%", "50%", "75%", "100%"])
-        ax.set_title(label)
-        st.pyplot(fig)
-    
-    battery_bar(hit_rate, "Hit Rate", "green")
-    battery_bar(miss_rate, "Miss Rate", "red")
-    
+    # Battery-like Visualization (HTML Bar)
+    st.subheader("Hit/Miss Visualization")
+    st.markdown(
+        f"""
+        <div style="width: 100%; height: 30px; background-color: #eee; border-radius: 8px; display: flex; overflow: hidden; margin-top: 10px;">
+            <div style="width: {miss_rate}%; background-color: #e74c3c;"></div>
+            <div style="width: {hit_rate}%; background-color: #2ecc71;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 5px;">
+            <span>🔴 Miss Rate ({miss_rate:.1f}%)</span>
+            <span>🟢 Hit Rate ({hit_rate:.1f}%)</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+        
     # Memory States Table
     st.markdown("---")
     st.header("Memory State Changes")
     state_data = []
     for i, state in enumerate(memory_states):
         fault = "✔️" if pages[i] not in (memory_states[i-1] if i > 0 else []) else "➖"
-        row = {
-            "Step": i+1,
-            "Frame 1": state[0] if len(state) > 0 else "-",
-            "Frame 2": state[1] if len(state) > 1 else "-",
-            "Frame 3": state[2] if len(state) > 2 else "-",
-            "Page Fault": fault
-        }
+        row = {"Step": i + 1}
+        for f in range(frames):
+            row[f"Frame {f + 1}"] = state[f] if f < len(state) else "-"
+        row["Page Fault"] = fault
         state_data.append(row)
-    st.table(state_data)
+    
+    df = pd.DataFrame(state_data)
+    st.table(df)
     
     # Algorithm Comparison
     st.markdown("---")
@@ -149,6 +135,7 @@ if st.button("Generate"):
     faults = [fifo(pages, frames)[0], lru(pages, frames)[0], optimal(pages, frames)[0]]
     ax.bar(algorithms, faults, color=["#4C72B0", "#55A868", "#C44E52"])
     ax.set_ylabel("Page Faults")
+    ax.set_title("Page Faults by Algorithm")
     ax.grid(True, linestyle='--', alpha=0.6)
     st.pyplot(fig)
     
@@ -172,4 +159,4 @@ if st.button("Generate"):
         """)
 
 st.markdown("---")
-st.caption("Page Replacement Algorithm Simulator © 2023")
+st.caption("Made by Sarthak Pipladiya, Abhishek Kumar, Himanshu Gobari")
