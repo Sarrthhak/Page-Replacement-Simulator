@@ -6,16 +6,27 @@ import numpy as np
 def fifo(pages, frames):
     memory, page_faults = [], 0
     memory_states = []
+    decisions = []
+    
     for page in pages:
+        message = ""
         if page not in memory:
             if len(memory) < frames:
                 memory.append(page)
+                message = f"➕ Page {page} added."
             else:
-                memory.pop(0)
+                removed = memory.pop(0)
                 memory.append(page)
+                message = f"🔁 Page {removed} replaced with {page} (FIFO)."
             page_faults += 1
+        else:
+            message = f"✅ Page {page} hit. No replacement."
+        
         memory_states.append(memory.copy())
-    return page_faults, memory_states
+        decisions.append(message)
+    
+    return page_faults, memory_states, decisions
+
 
 def lru(pages, frames):
     memory, page_faults = [], 0
