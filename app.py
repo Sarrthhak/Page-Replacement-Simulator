@@ -165,4 +165,4 @@ if st.button("Generate"):
         st.info("FIFO is simple and easy to implement, but may suffer from Belady’s anomaly in some cases.")
 
 st.markdown("---")
-st.caption("Made with ❤️ by Sarthak Pipladiya, Abhishek Kumar, Himanshu Gobari")
+st.caption("Made with ❤️ by Sarthak Pipladiya")
